@@ -59,7 +59,7 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                 didCellAppear = false
             }
             .highPriorityGesture(
-                LongPressGesture(minimumDuration: 0.1, maximumDistance: 50)
+                LongPressGesture(minimumDuration: 0.25, maximumDistance: 50)
                     .sequenced(before:
                                 DragGesture(minimumDistance: 0)
                                 .onChanged({ value in
