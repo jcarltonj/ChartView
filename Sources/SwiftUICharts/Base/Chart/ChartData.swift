@@ -69,12 +69,12 @@ extension ChartData where Root == SimpleChartDataPoint {
     /// Initialize with data array
     /// - Parameter data: Array of `Double`
     public convenience init(_ data: [Double]) {
-        self.init(data.map { SimpleChartDataPoint(chartPoint: $0, chartValue: "") },
+        self.init(data.map { SimpleChartDataPoint(chartPoint: $0, chartValue: "", graphTransactionTime: "") },
                   keyPathForGraphValue: \.chartPoint)
     }
 
     public convenience init(_ data: [(String, Double)]) {
-        self.init(data.map { SimpleChartDataPoint(chartPoint: $0.1, chartValue: $0.0) },
+        self.init(data.map { SimpleChartDataPoint(chartPoint: $0.1, chartValue: $0.0, graphTransactionTime: "") },
                   keyPathForGraphValue: \.chartPoint)
     }
     
