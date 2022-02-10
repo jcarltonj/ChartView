@@ -24,6 +24,10 @@ public class ChartData<Root: ChartDataPoint>: ObservableObject {
     var values: [String] {
         data.map { $0.chartValue }
     }
+    
+    var graphTimeLabels: [String] {
+        data.map { $0.graphTransactionTime }
+    }
 
     var normalisedPoints: [Double] {
         let absolutePoints = points.map { abs($0) }

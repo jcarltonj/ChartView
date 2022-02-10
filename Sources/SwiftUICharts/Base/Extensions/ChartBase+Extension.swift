@@ -15,12 +15,12 @@ extension View where Self: AdvancedChartBase {
 
 extension View where Self: ChartBase, Root == SimpleChartDataPoint {
     public func data(_ data: [Double]) -> some View {
-        let convertedData = data.map { SimpleChartDataPoint(chartPoint: $0, chartValue: "") }
+        let convertedData = data.map { SimpleChartDataPoint(chartPoint: $0, chartValue: "", graphTransactionTime: "") }
         return self.data(convertedData, keyPathForGraphValue: \Root.chartPoint)
     }
 
     public func data(_ data: [(String, Double)]) -> some View {
-        let convertedData = data.map { SimpleChartDataPoint(chartPoint: $0.1, chartValue: $0.0) }
+        let convertedData = data.map { SimpleChartDataPoint(chartPoint: $0.1, chartValue: $0.0, graphTransactionTime: "") }
         return self.data(convertedData, keyPathForGraphValue: \Root.chartPoint)
     }
     public func data(_ data: [Root], keyPathForGraphValue: KeyPath<Root, Double>) -> some View where ChartValueType.Root == Root {

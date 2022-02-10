@@ -10,4 +10,5 @@ import Foundation
 public struct SimpleChartDataPoint: ChartDataPoint {
     public var chartPoint: Double
     public var chartValue: String
+    public var graphTransactionTime: String
 }

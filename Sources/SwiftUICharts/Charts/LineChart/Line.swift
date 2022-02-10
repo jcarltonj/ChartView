@@ -10,6 +10,10 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
     @State private var showIndicator: Bool = false
     @State private var touchLocation: CGPoint = .zero
     @State private var didCellAppear: Bool = false
+    
+    @State private var timeLabel: String = ""
+    @State private var indicatorLinePosition: Double = 0.0
+    @State private var didTapOnce: Bool = false
 
     var curvedLines: Bool = true
     var path: Path {
@@ -42,13 +46,14 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                               geometry: geometry,
                               style: style,
                               trimTo: didCellAppear ? 1.0 : 0.0)
+                    .onViewLayout(coordinateSpace: .local) { rect in
+                        indicatorLinePosition = rect.minY
+                    }
 
                 if self.showIndicator {
-                    IndicatorPoint()
-                        .position(self.getClosestPointOnPath(geometry: geometry,
-                                                             touchLocation: self.touchLocation))
-                        .rotationEffect(.degrees(180), anchor: .center)
-                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                    IndicatorLine(timeLabel: $timeLabel)
+                        .position(x: self.getClosestPointOnPath(geometry: geometry,
+                                                                touchLocation: self.touchLocation).x, y: indicatorLinePosition)
                 }
             }
             
@@ -59,7 +64,25 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                 didCellAppear = false
             }
             .highPriorityGesture(
-                LongPressGesture(minimumDuration: 0.25, maximumDistance: 50)
+                DragGesture(minimumDistance: 0)
+                    .onChanged({ value in
+                        self.touchLocation = value.location
+                        self.showIndicator = true
+                        self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
+                        self.chartValue.interactionInProgress = true
+                        if !didTapOnce {
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.prepare()
+                            generator.impactOccurred()
+                            didTapOnce = true
+                        }
+                    })
+                    .onEnded({ value in
+                        self.touchLocation = .zero
+                        self.showIndicator = false
+                        self.chartValue.interactionInProgress = false
+                        didTapOnce = false
+                    })
                     .sequenced(before:
                                 DragGesture(minimumDistance: 0)
                                 .onChanged({ value in
@@ -101,6 +124,7 @@ extension Line {
         let index = Int(round((touchLocation.x / geometryWidth) * CGFloat(chartData.points.count - 1)))
         if (index >= 0 && index < self.chartData.data.count){
             self.chartValue.currentValue = self.chartData.data[index]
+            self.timeLabel = self.chartData.data[index].graphTransactionTime
         } else {
             self.chartValue.currentValue = nil
         }

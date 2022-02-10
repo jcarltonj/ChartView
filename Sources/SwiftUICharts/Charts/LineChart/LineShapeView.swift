@@ -19,7 +19,7 @@ struct LineShapeView<Root: ChartDataPoint>: View, Animatable {
             .stroke(LinearGradient(gradient: style.foregroundColor.first?.gradient ?? ColorGradient.orangeBright.gradient,
                                    startPoint: .leading,
                                    endPoint: .trailing),
-                    style: StrokeStyle(lineWidth: 3, lineJoin: .round))
+                    style: StrokeStyle(lineWidth: 2, lineJoin: .round))
             .rotationEffect(.degrees(180), anchor: .center)
             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
     }
