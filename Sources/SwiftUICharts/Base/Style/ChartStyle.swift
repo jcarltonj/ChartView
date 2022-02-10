@@ -13,6 +13,9 @@ public class ChartStyle: ObservableObject {
     
     /// The color for the indicator point on the line graph, if not set it uses the default value
     public var indicatorPointColor: Color?
+    
+    /// Font to use on the indication label
+    public var font: Font?
 
 	/// Initialize with a single background color and an array of `ColorGradient` for the foreground
 	/// - Parameters:

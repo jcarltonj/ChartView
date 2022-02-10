@@ -12,7 +12,9 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
     @State private var didCellAppear: Bool = false
     
     @State private var timeLabel: String = ""
-    @State private var indicatorLinePosition: Double = 0.0
+    
+    @State private var indicatorLineX: Double = 0.0
+    @State private var indicatorLineY: Double = 0.0
     @State private var didTapOnce: Bool = false
 
     var curvedLines: Bool = true
@@ -47,16 +49,15 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                               style: style,
                               trimTo: didCellAppear ? 1.0 : 0.0)
                     .onViewLayout(coordinateSpace: .local) { rect in
-                        indicatorLinePosition = rect.minY
+                        indicatorLineY = rect.minY
                     }
 
                 if self.showIndicator {
-                    IndicatorLine(timeLabel: $timeLabel)
+                    IndicatorLine(timeLabel: $timeLabel, indicatorLineX: $indicatorLineX)
                         .position(x: self.getClosestPointOnPath(geometry: geometry,
-                                                                touchLocation: self.touchLocation).x, y: indicatorLinePosition)
+                                                                touchLocation: self.touchLocation).x, y: indicatorLineY)
                 }
             }
-            
             .onAppear {
                 didCellAppear = true
             }
@@ -83,19 +84,19 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                         self.chartValue.interactionInProgress = false
                         didTapOnce = false
                     })
-                    .sequenced(before:
-                                DragGesture(minimumDistance: 0)
-                                .onChanged({ value in
-                                    self.touchLocation = value.location
-                                    self.showIndicator = true
-                                    self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
-                                    self.chartValue.interactionInProgress = true
-                                })
-                                .onEnded({ value in
-                                    self.touchLocation = .zero
-                                    self.showIndicator = false
-                                    self.chartValue.interactionInProgress = false
-                                }))
+//                    .sequenced(before:
+//                                DragGesture(minimumDistance: 0)
+//                                .onChanged({ value in
+//                                    self.touchLocation = value.location
+//                                    self.showIndicator = true
+//                                    self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
+//                                    self.chartValue.interactionInProgress = true
+//                                })
+//                                .onEnded({ value in
+//                                    self.touchLocation = .zero
+//                                    self.showIndicator = false
+//                                    self.chartValue.interactionInProgress = false
+//                                }))
             )
         }
     }
@@ -125,6 +126,7 @@ extension Line {
         if (index >= 0 && index < self.chartData.data.count){
             self.chartValue.currentValue = self.chartData.data[index]
             self.timeLabel = self.chartData.data[index].graphTransactionTime
+            self.indicatorLineX = touchLocation.x
         } else {
             self.chartValue.currentValue = nil
         }

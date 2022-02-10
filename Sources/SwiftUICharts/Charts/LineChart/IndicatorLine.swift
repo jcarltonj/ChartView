@@ -13,16 +13,20 @@ struct IndicatorLine: View {
     @EnvironmentObject var chartStyle: ChartStyle
     @State private var offset: Double = 0.0
     @Binding var timeLabel: String
-    /// The content and behavior of the `IndicatorPoint`.
-    ///
-    /// A filled circle with a thick white outline and a shadow
+    @Binding var indicatorLineX: Double
+    
+    var labelXOffset: Double {
+        indicatorLineX < 30 ? 20 : indicatorLineX > UIScreen.main.bounds.maxX - 30 ? -20 : .zero
+    }
+    
     public var body: some View {
         VStack(spacing: 4.0) {
             Text(timeLabel)
-                .font(.system(size: 14.0))
+                .font(chartStyle.font ?? .system(size: 14.0))
                 .onSizeChanged { size in
                     offset = size.height * 1.45
                 }
+                .offset(x: labelXOffset)
             Rectangle()
                 .frame(width: 1, height: 160)
         }
@@ -33,7 +37,7 @@ struct IndicatorLine: View {
 
 struct IndicatorLine_Previews: PreviewProvider {
     static var previews: some View {
-        IndicatorLine(timeLabel: .constant("9:47 AM"))
+        IndicatorLine(timeLabel: .constant("9:47 AM"), indicatorLineX: .constant(40.0))
             .environmentObject(ChartStyle(backgroundColor: .blue, foregroundColor: ColorGradient.greenRed))
             .padding()
             .previewLayout(.sizeThatFits)
