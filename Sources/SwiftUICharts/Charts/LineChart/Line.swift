@@ -54,8 +54,7 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
 
                 if self.showIndicator {
                     IndicatorLine(timeLabel: $timeLabel, indicatorLineX: $indicatorLineX)
-                        .position(x: self.getClosestPointOnPath(geometry: geometry,
-                                                                touchLocation: self.touchLocation).x, y: indicatorLineY)
+                        .position(x: indicatorLineX, y: indicatorLineY)
                 }
             }
             .onAppear {
@@ -67,14 +66,14 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
             .highPriorityGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged({ value in
-                        self.touchLocation = value.location
-                        self.showIndicator = true
-                        self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
-                        self.chartValue.interactionInProgress = true
                         if !didTapOnce {
+                            self.touchLocation = value.location
+                            self.showIndicator = true
+                            self.chartValue.interactionInProgress = true
                             let generator = UIImpactFeedbackGenerator(style: .light)
                             generator.prepare()
                             generator.impactOccurred()
+                            self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
                             didTapOnce = true
                         }
                     })
@@ -84,19 +83,17 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                         self.chartValue.interactionInProgress = false
                         didTapOnce = false
                     })
-//                    .sequenced(before:
-//                                DragGesture(minimumDistance: 0)
-//                                .onChanged({ value in
-//                                    self.touchLocation = value.location
-//                                    self.showIndicator = true
-//                                    self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
-//                                    self.chartValue.interactionInProgress = true
-//                                })
-//                                .onEnded({ value in
-//                                    self.touchLocation = .zero
-//                                    self.showIndicator = false
-//                                    self.chartValue.interactionInProgress = false
-//                                }))
+                    .simultaneously(with:
+                                        DragGesture(minimumDistance: 10)
+                                            .onChanged({ value in
+                                                if didTapOnce {
+                                                    self.touchLocation = value.location
+                                                    self.showIndicator = true
+                                                    self.chartValue.interactionInProgress = true
+                                                    self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
+                                                }
+                                            })
+                                   )
             )
         }
     }
@@ -125,7 +122,9 @@ extension Line {
         let index = Int(round((touchLocation.x / geometryWidth) * CGFloat(chartData.points.count - 1)))
         if (index >= 0 && index < self.chartData.data.count){
             self.chartValue.currentValue = self.chartData.data[index]
-            self.timeLabel = self.chartData.data[index].graphTransactionTime
+            withAnimation(.none) {
+                self.timeLabel = self.chartData.data[index].graphTransactionTime
+            }
             self.indicatorLineX = touchLocation.x
         } else {
             self.chartValue.currentValue = nil
