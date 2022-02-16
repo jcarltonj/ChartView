@@ -1,5 +1,8 @@
 import SwiftUI
-
+public enum LeftRight {
+    case left
+    case right
+}
 /// A single line of data, a view in a `LineChart`
 public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where ChartValueType.Root == Root {
     @EnvironmentObject var chartValue: ChartValueType
@@ -16,8 +19,9 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
     @State private var indicatorLineX: Double = 0.0
     @State private var indicatorLineY: Double = 0.0
     @State private var didTapOnce: Bool = false
-
+    var swipeFunction: (LeftRight) -> Void
     var curvedLines: Bool = true
+    @State private var date: Date = Date()
     var path: Path {
         Path.quadCurvedPathWithPoints(points: chartData.normalisedPoints,
                                       step: CGPoint(x: 1.0, y: 1.0))
@@ -63,10 +67,12 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
             .onDisappear() {
                 didCellAppear = false
             }
-            .highPriorityGesture(
+            .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged({ value in
+                        
                         if !didTapOnce {
+                            date = Date()
                             self.touchLocation = value.location
                             self.showIndicator = true
                             self.chartValue.interactionInProgress = true
@@ -92,9 +98,14 @@ public struct Line<Root: ChartDataPoint, ChartValueType: ChartValue>: View where
                                                     self.chartValue.interactionInProgress = true
                                                     self.getClosestDataPoint(geometry: geometry, touchLocation: value.location)
                                                 }
+                                                print(value.translation.width)
+                                                if abs(value.translation.width) > 100 && abs(date.timeIntervalSinceNow) < 0.2 {
+                                                    swipeFunction(value.translation.width > 0 ? .right : .left)
+                                                }
                                             })
                                    )
             )
+            
         }
     }
 }
@@ -141,8 +152,8 @@ struct Line_Previews: PreviewProvider {
 
     static var previews: some View {
         Group {
-            Line<SimpleChartDataPoint, SimpleChartValue>(chartData:  ChartData([8, 23, 32, 7, 23, -4]), style: blackLineStyle)
-            Line<SimpleChartDataPoint, SimpleChartValue>(chartData:  ChartData([8, 23, 32, 7, 23, 43]), style: redLineStyle)
+            Line<SimpleChartDataPoint, SimpleChartValue>(chartData:  ChartData([8, 23, 32, 7, 23, -4]), style: blackLineStyle, swipeFunction: {_ in })
+            Line<SimpleChartDataPoint, SimpleChartValue>(chartData:  ChartData([8, 23, 32, 7, 23, 43]), style: redLineStyle, swipeFunction: {_ in })
         }
     }
 }
