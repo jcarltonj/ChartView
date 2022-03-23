@@ -24,11 +24,11 @@ struct IndicatorLine: View {
             Text(timeLabel)
                 .font(chartStyle.font ?? .system(size: 14.0))
                 .onSizeChanged { size in
-                    offset = size.height * 1.45
+                    offset = size.height * 1.35
                 }
                 .offset(x: labelXOffset)
             Rectangle()
-                .frame(width: 1, height: 160)
+                .frame(width: 1, height: 136)
         }
         .foregroundColor(Color(.sRGB, red: 204.0/255.0, green: 204.0/255.0, blue: 204.0/255.0))
         .offset(y: offset)
